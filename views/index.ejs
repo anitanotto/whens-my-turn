@@ -1,0 +1,30 @@
+<html>
+<head>
+    <title>When's My Turn?</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="https://fonts.xz.style/serve/inter.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@exampledev/new.css@1.1.2/new.min.css">
+<head>
+<body>
+    <header>
+        <h1>When's My Turn?</h1>
+        <p>Always know when they're minus.</p>
+
+        <nav>
+            <a href="#">Home</a><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <a href="#">API</a><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span>Data from </span><a href="https://www.dustloop.com/w/">Dustloop</a>
+        </nav>
+    </header>
+
+    <h2>Select your game:</h2>
+    <table>
+        <tbody>
+            <% for (let i = 0; i < names.length; i++) { %>
+                <a href="/game/<%=names[i]%>"><img src="<%= imgs[i] %>" style="width: 33.3333%"></a>
+            <% } %>
+        </tbody>
+    </table>
+</body>
+</html>
