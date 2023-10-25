@@ -110,6 +110,62 @@ app.get('/matchup/:game/:p1/:p2', async function(req, res) {
 })
 
 async function parseMatchup(game, p1, p2) {
+    const matchup = { game: game }
 
+    matchup[p1] = await parseCharacter(game, p1)
+
+    if (p1 !== p2) {
+        matchup[p2] = await parseCharacter(game, p2)
+    }
+
+    return matchup
 }
 
+async function parseCharacter(game, character) {
+    if (game === "DNF_Duel") {
+        game = "DNFD"
+    }
+
+    if (game === "Guilty_Gear_-Strive-") {
+        game = "GGST"
+    }
+
+    if (game === "Granblue_Fantasy:_Versus") {
+        game = "GBVS"
+    }
+
+    if (game === "Dragon_Ball_FighterZ") {
+        game = "DBFZ"
+    }
+
+    if (game === "BlazBlue:_Cross_Tag_Battle") {
+        game = "BBTag"
+    }
+
+    if (game === "Guilty_Gear_Xrd_REV_2") {
+        game = "GGXRD-R2"
+    }
+
+    if (game === "BlazBlue:_Central_Fiction") {
+        game = "BBCF"
+    }
+
+    if (game === "Persona_4:_Arena_Ultimax_Remaster") {
+        game = "P4U2R"
+    }
+
+    if (game === "Guilty_Gear_XX_Accent_Core_Plus_R") {
+        game = "GGACR"
+    }
+
+    if (game === "Hokuto_no_Ken") {
+        game = "HNK"
+    }
+
+    if (game === "Guilty_Gear:_The_Missing_Link") {
+        game = "GGML"
+    }
+    
+    const url = baseURL + '/w/' + game + '/' + character + '/Frame_Data'
+    console.log(url)
+}
