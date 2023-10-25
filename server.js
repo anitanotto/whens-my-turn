@@ -16,6 +16,8 @@ app.use(express.json())
 
 app.get('/', async function(req,res) {
     const data = await parseIndex()
+    console.log('get / ')
+    console.log(data[0])
     res.render('index.ejs', {names: data[0], links: data[1], imgs: data[2]})
 })
 
@@ -45,7 +47,8 @@ async function parseIndex() {
 
 app.get('/game/:game', async function(req, res) {
     const data = await parseGame(req.params.game)
-
+    console.log(`get ${req.params.game}`)
+    console.log(data)
     if (data === 'error') res.redirect('/error')
     
     res.render('game.ejs', {characters: data, game: req.params.game})
@@ -72,7 +75,7 @@ async function parseGame(game){
         selector = 'a'
     }
     
-    if (game === 'BlazBlue:_Central_Fiction' || 'Guilty_Gear_XX_Accent_Core_Plus_R') {
+    if (game === 'BlazBlue:_Central_Fiction' || game === 'Guilty_Gear_XX_Accent_Core_Plus_R') {
         return Array.from(document.querySelectorAll('area')).map(character => {
             character = character.href.split('/')
             return character[character.length-1]
@@ -87,10 +90,8 @@ async function parseGame(game){
                 character = character.href.split('/')
                 return character[character.length-1]
             }
-
-            return character.innerHTML
+            return character.innerHTML.split(' ').join('_')
         })
-
         return characters.sort()
     }
 }
@@ -98,3 +99,17 @@ async function parseGame(game){
 app.get('/error', (req, res) => {
     res.send('There was an error processing your request - if you selected P4AU, that game is not currently working on this page.')
 })
+
+app.get('/matchup/:game/:p1/:p2', async function(req, res) {
+    const data = await parseMatchup(req.params.game, req.params.p1, req.params.p2)
+    console.log(`get ${req.params.game} : ${req.params.p1} vs ${req.params.p2}`)
+    console.log(data)
+    if (data === 'error') res.redirect('/error')
+    
+    res.render('matchup.ejs', {game: req.params.game, characters: await parseGame(req.params.game),  p1: req.params.p1, p2: req.params.p2})
+})
+
+async function parseMatchup(game, p1, p2) {
+
+}
+
