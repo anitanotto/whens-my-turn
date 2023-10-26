@@ -105,8 +105,8 @@ app.get('/matchup/:game/:p1/:p2', async function(req, res) {
     console.log(`get ${req.params.game} : ${req.params.p1} vs ${req.params.p2}`)
     console.log(data)
     if (data === 'error') res.redirect('/error')
-    
-    res.render('matchup.ejs', {game: req.params.game, characters: await parseGame(req.params.game),  p1: req.params.p1, p2: req.params.p2})
+    const characters = await parseGame(req.params.game) 
+    res.render('matchup.ejs', {game: req.params.game, characters: characters,  p1: data[req.params.p1], p2: data[req.params.p2]})
 })
 
 async function parseMatchup(game, p1, p2) {
@@ -122,6 +122,8 @@ async function parseMatchup(game, p1, p2) {
 }
 
 async function parseCharacter(game, character) {
+    const res = {}
+
     if (game === "DNF_Duel") {
         game = "DNFD"
     }
@@ -167,5 +169,106 @@ async function parseCharacter(game, character) {
     }
     
     const url = baseURL + '/w/' + game + '/' + character + '/Frame_Data'
-    console.log(url)
+
+    let html = await fetch(url)
+    let data = await html.text()
+
+    const { document } = new JSDOM(data).window
+
+    // There will be multiple containers -> loop through '#section-collapsable-1' until 'section-collapsible-X' is undefined?
+
+    let i = 0
+    let container = document.querySelector(`#section-collapsible-${i}`)
+    while (container) {
+        const tables = container.querySelectorAll('table')
+
+        if (tables == null) {
+            i++
+            container = document.querySelector(`#section-collapsible-${i}`)
+            continue
+        }
+        
+        tables.forEach(table => {
+            const headings = table.querySelectorAll('thead th')
+            let j = 0
+            let inputColumn = null
+            let nameColumn = null
+            let onBlockColumn = null
+            let startupColumn = null
+            
+            headings.forEach(e => {
+                if (e.innerHTML === 'Input' || e.innerHTML === 'input') {
+                    inputColumn = j
+                }
+                if (e.innerHTML === 'Name' || e.innerHTML === 'name') {
+                    nameColumn = j
+                }
+                if (e.innerHTML === 'On-Block' || e.innerHTML === 'onBlock') {
+                    onBlockColumn = j
+                }
+                if (e.innerHTML === 'Startup' || e.innerHTML === 'startup') {
+                    startupColumn = j
+                }
+
+                j++
+            })
+
+            if (startupColumn != null && onBlockColumn != null) {
+                const rows = table.querySelectorAll('tbody tr')
+                //rows.forEach(row => console.log(row.innerHTML))
+
+                for (let k = 0; k < rows.length; k++) {
+                    const columns = rows[k].querySelectorAll('td')
+                    let input = ''
+                    let name = ''
+                    let onBlock = null
+                    let startup = null
+
+                    for (let l = 0; l < columns.length; l++) {
+                        if (l === inputColumn) {
+                            input = columns[l].innerHTML
+                        }
+
+                        if (l === nameColumn) {
+                            name = columns[l].innerHTML
+                        }
+
+                        if (l === onBlockColumn) {
+                            onBlock = parseInt(columns[l].innerHTML)
+                        }
+
+                        if (l === startupColumn) {
+                            startup = parseInt(columns[l].innerHTML)
+                        }
+                    }
+                    if ((input || name) && (startup != null && onBlock != null)) {
+                        if (!Number.isNaN(startup) || !Number.isNaN(onBlock)) {
+                            res[name || input] = {}
+                        }
+                        if (!Number.isNaN(startup)) {
+                            res[name || input].startup = startup
+                        }
+                        if (!Number.isNaN(onBlock)) {
+                            res[name || input].onBlock = onBlock
+                        }
+                    }
+                }
+            }
+        })
+
+        i++
+        container = document.querySelector(`#section-collapsible-${i}`)
+    }
+
+    // If section has onBlock column, then select for these:
+    // should just be the first img?
+    let imageSelector = ''
+    // If name column doesn't exist then find the input column
+    let nameSelector = ''
+    // These might be different depending on the game so check for 
+    // Add a flag to check if startup or on block is needed?
+    let startupSelector = ''
+    let onBlockSelector = ''
+    
+    return res
 }
