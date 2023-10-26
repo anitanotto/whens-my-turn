@@ -106,7 +106,7 @@ app.get('/matchup/:game/:p1/:p2', async function(req, res) {
     console.log(data)
     if (data === 'error') res.redirect('/error')
     const characters = await parseGame(req.params.game) 
-    res.render('matchup.ejs', {game: req.params.game, characters: characters,  p1: data[req.params.p1], p2: data[req.params.p2]})
+    res.render('matchup.ejs', {game: req.params.game, characters: characters,  p1name: req.params.p1, p1: data[req.params.p1], p2name: req.params.p2, p2: data[req.params.p2]})
 })
 
 async function parseMatchup(game, p1, p2) {

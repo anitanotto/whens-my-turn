@@ -5,9 +5,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
     <link rel="stylesheet" href="https://fonts.xz.style/serve/inter.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@exampledev/new.css@1.1.2/new.min.css">
+    <script defer src="/js/main.js"></script>
 <head>
 <body>
-    <header>
+    <header id="<%= game %>">
         <h1>When's My Turn in <%=game.replaceAll('_',' ')%>?</h1>
         <nav>
             <a href="/">Home</a><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
@@ -17,19 +18,19 @@
     </header>
 
     <span>I'm </span>
-    <select>
+    <select id="p1">
     <% for(let character of characters) { %>
         <% character = character.split('_').join(' ') %>
         <option><%=character%></option>
     <% } %>
     </select>
     <span> vs. </span>
-    <select>
-    <% for(let character of characters) { %>
-        <% character = character.split('_').join(' ') %>
-        <option><%=character%></option>
+    <select id="p2">
+    <% for(let i = 0; i < characters.length; i++) { %>
+        <%  let character = characters[i].split('_').join(' ') %>
+        <option <% if (i === 1) { %>selected<% } %> ><%=character%></option>
     <% } %>
     </select>
-    <a id="charSelect" href="<%=`/matchup/${game}/${characters[0]}/${characters[0]}`%>"><button>When's my turn?</button></a>
+    <a id="charSelect" href="<%=`/matchup/${game}/${characters[0]}/${characters[1]}`%>"><button>When's my turn?</button></a>
 </body>
 </html>
