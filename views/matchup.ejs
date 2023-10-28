@@ -34,5 +34,24 @@
 
     </header>
 
+
+    <table>
+        <% for (const move of Object.keys(p2)) { %>
+            <% if (p2[move].onBlock != undefined) { %>
+                <% const onBlock = p2[move].onBlock %>
+                <% const punishes = [] %>
+                <% for (const punish of Object.keys(p1)) { %>
+                    <% if ((onBlock + p1[punish].startup) <= 0) { %>
+                        <% punishes.push(punish) %>
+                    <% } %>
+                <% } %>
+
+                <% if (punishes.length) { %>
+                    <p>If you block <%= move %> : you can <%= String(punishes) %></p>
+                <% } %>
+            <% } %>
+        <% } %>
+    </table>
+
 </body>
 </html>
