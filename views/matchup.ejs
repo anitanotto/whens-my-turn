@@ -39,15 +39,28 @@
         <% for (const move of Object.keys(p2)) { %>
             <% if (p2[move].onBlock != undefined) { %>
                 <% const onBlock = p2[move].onBlock %>
-                <% const punishes = [] %>
-                <% for (const punish of Object.keys(p1)) { %>
-                    <% if ((onBlock + p1[punish].startup) <= 0) { %>
+                <% const reversals = [] %>
+                <% let punishes = [] %>
+                <% const filters = ['air', 'aerial', '(2)', 'j.'] %>
+                <% const p1moves = Object.keys(p1).filter(e => !filters.some(f => e.toLowerCase().includes(f))) %>
+                <% for (const punish of p1moves) { %>
+                    <% if ((onBlock + p1[punish].startup) === 0) { %>
+                        <% reversals.push(punish) %>
+                    <% } else if ((onBlock + p1[punish].startup) <= 0) { %>
                         <% punishes.push(punish) %>
+                    <% } %>
+
+                    <% if ((punishes.length + reversals.length) === p1moves.length) { %>
+                        <% punishes = ['anything'] %>
                     <% } %>
                 <% } %>
 
                 <% if (punishes.length) { %>
-                    <p>If you block <%= move %> : you can <%= String(punishes) %></p>
+                    <% if (reversals.length) { %>
+                        <p>If you block <%= move %> : you can reversal <%= String(reversals) %> to punish<br>or punish with <%= String(punishes) %></p>
+                    <% } else { %>
+                        <p>If you block <%= move %> : you can punish with <%= String(punishes) %></p>
+                    <% } %>
                 <% } %>
             <% } %>
         <% } %>

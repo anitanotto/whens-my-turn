@@ -103,7 +103,6 @@ app.get('/error', (req, res) => {
 app.get('/matchup/:game/:p1/:p2', async function(req, res) {
     const data = await parseMatchup(req.params.game, req.params.p1, req.params.p2)
     console.log(`get ${req.params.game} : ${req.params.p1} vs ${req.params.p2}`)
-    console.log(data)
     if (data === 'error') res.redirect('/error')
     const characters = await parseGame(req.params.game) 
     res.render('matchup.ejs', {game: req.params.game, characters: characters,  p1name: req.params.p1, p1: data[req.params.p1], p2name: req.params.p2, p2: data[req.params.p2]})
@@ -170,6 +169,20 @@ async function parseCharacter(game, character) {
     
     const url = baseURL + '/w/' + game + '/' + character + '/Frame_Data'
 
+    const imgUrl = baseURL + '/w/' + game + '/' + character
+    let imgHtml = await fetch(imgUrl)
+    let imgData = await imgHtml.text()
+    
+    function parseImgs(data) {
+        const { document } = new JSDOM(data).window
+        const attacks =  document.querySelectorAll('.attack-gallery')
+        const imgs = []
+        attacks.forEach(a => imgs.push(a.querySelector('img')))
+        return imgs
+    }
+    const imgs = parseImgs(imgData)
+    imgs.forEach(i => console.log(i.src))
+
     let html = await fetch(url)
     let data = await html.text()
 
@@ -195,7 +208,7 @@ async function parseCharacter(game, character) {
             let nameColumn = null
             let onBlockColumn = null
             let startupColumn = null
-            
+                
             headings.forEach(e => {
                 if (e.innerHTML === 'Input' || e.innerHTML === 'input') {
                     inputColumn = j
@@ -215,7 +228,6 @@ async function parseCharacter(game, character) {
 
             if (startupColumn != null && onBlockColumn != null) {
                 const rows = table.querySelectorAll('tbody tr')
-                //rows.forEach(row => console.log(row.innerHTML))
 
                 for (let k = 0; k < rows.length; k++) {
                     const columns = rows[k].querySelectorAll('td')
@@ -259,16 +271,6 @@ async function parseCharacter(game, character) {
         i++
         container = document.querySelector(`#section-collapsible-${i}`)
     }
-
-    // If section has onBlock column, then select for these:
-    // should just be the first img?
-    let imageSelector = ''
-    // If name column doesn't exist then find the input column
-    let nameSelector = ''
-    // These might be different depending on the game so check for 
-    // Add a flag to check if startup or on block is needed?
-    let startupSelector = ''
-    let onBlockSelector = ''
-    
+    console.log(res)
     return res
 }
