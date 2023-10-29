@@ -103,6 +103,7 @@ app.get('/error', (req, res) => {
 app.get('/matchup/:game/:p1/:p2', async function(req, res) {
     const data = await parseMatchup(req.params.game, req.params.p1, req.params.p2)
     console.log(`get ${req.params.game} : ${req.params.p1} vs ${req.params.p2}`)
+    console.log(data)
     if (data === 'error') res.redirect('/error')
     const characters = await parseGame(req.params.game) 
     res.render('matchup.ejs', {game: req.params.game, characters: characters,  p1name: req.params.p1, p1: data[req.params.p1], p2name: req.params.p2, p2: data[req.params.p2]})
@@ -167,8 +168,139 @@ async function parseCharacter(game, character) {
         game = "GGML"
     }
     
-    const url = baseURL + '/w/' + game + '/' + character + '/Frame_Data'
+    const url = baseURL + '/w/' + game + '/' + character
+    let html = await fetch(url)
+    let data = await html.text()
 
+    const { document } = new JSDOM(data).window
+
+    const names = Array.from(document.querySelectorAll(".section-subheading")).map(n => n.textContent).filter(e => (e !== 'Unique Mechanics') && (e !== 'Instant Kill'))
+    for (const name of names) {
+        res[name] = {}
+    }
+
+    const keys = Object.keys(res)
+    const moves = document.querySelectorAll(".attack-container")
+    let i = 0
+    for (const move of moves) {
+        if (keys[i] == undefined) break
+
+        const table = move.querySelector("table")
+        const img = move.querySelector('img').src
+
+        if (table.innerHTML.includes("Version")) {
+            delete res[keys[i]]
+            const rows = Array.from(table.querySelectorAll('tr'))
+            const headings = []
+            rows[0].querySelectorAll('th').forEach(r => {
+                if (r.textContent.trim() !== 'Version') {
+                    if (r.children.length === 0) {
+                        headings.push(r.textContent.trim())
+                    } else {
+                        const text = r.querySelector('.tooltip')
+                        const tooltipText = r.querySelector('.tooltiptext')
+                        if (text && tooltipText) {
+                            text.removeChild(tooltipText)
+                        }
+                        const heading = r.textContent.trim()
+
+                        if (heading === "Frame Adv") {
+                            headings.push('On-Block')
+                        } else {
+                            headings.push(r.textContent.trim())
+                        }
+                    }
+                }
+            })
+
+            for (let j = 1; j < rows.length; j++) {
+                let versionKey = ''
+                console.log(keys[i])
+                if (keys[i][0].match(/\d/) && !keys[i][1].match(/\d/)) {
+                    versionKey = rows[j].children[0].textContent.trim()
+                } else if (keys[i] === rows[j].children[0].textContent.trim()) {
+                    versionKey = rows[j].children[0].textContent.trim()
+                } else {
+                    versionKey = `${keys[i]} (${rows[j].children[0].textContent.trim()})`
+                }
+
+                res[versionKey] = {}
+
+                const columns = Array.from(rows[j].children).map(c => c.textContent.trim())
+
+                for (let k = 1; k < columns.length; k++) {
+                    let text = columns[k]
+                    if (text.match(/^[+-]*\d*[+]?\d*$/) && text !== '' && text !== '-') {
+                        res[versionKey][headings[k - 1]] = parseInt(text)
+                    } else {
+                        if (text === '-') text = ''
+                        // Edge case for P4U supers
+                        if (text.includes('Flash')) {
+                            text = text.split('+')
+                            text = parseInt(text[0]) + parseInt(text.at(-1))
+                        }
+                        res[versionKey][headings[k - 1]] = text
+                    }
+                }
+                const followCheck = rows[j].children[0].textContent.trim()
+                if (followCheck.match(/[A-Z]{2,}$/) || followCheck.includes('>') || followCheck.includes('~')) {
+                    res[versionKey].followup = true
+                }
+                res[versionKey].img = baseURL + img
+            }
+        } else {
+            const moveKeys = Array.from(table.querySelectorAll('th')).map(k => {
+                if (k.children.length === 0) {
+                    return k.textContent.trim()
+                } else {
+                    const text = k.querySelector('.tooltip')
+                    const tooltipText = k.querySelector('.tooltiptext')
+                    if (text && tooltipText) {
+                        text.removeChild(tooltipText)
+                    }
+                    
+                    const key = k.textContent.trim()
+                    if (key === "Frame Adv") {
+                        return 'On-Block'
+                    } else {
+                        return key
+                    }
+                }
+            })
+            const moveValues = Array.from(table.querySelectorAll('td')).map(v => {
+                let text = v.textContent.trim()
+                if (text.match(/^[+-]*\d*[+]?\d*$/) && text !== '' && text !== '-') {
+                    return parseInt(text)
+                } else {
+                    if (text === '-') text = ''
+
+                    // Edge case for P4U supers
+                    if (text.includes('Flash')) {
+                        text = text.split('+')
+                        return parseInt(text[0]) + parseInt(text.at(-1))
+                    }
+                    return text
+                }
+            })
+            
+            for (let j = 0; j < moveKeys.length; j++) {
+                res[keys[i]][moveKeys[j]] = moveValues[j]
+            }
+
+            if (keys[i].match(/[A-Z]{2,}$/) || keys[i].includes('>') || keys[i].includes('~')) {
+                res[keys[i]].followup = true
+            }
+            
+            res[keys[i]].img = baseURL + img
+        }
+
+        i++
+    }
+    
+    return res
+    //console.log(res)
+
+    /*
     const imgUrl = baseURL + '/w/' + game + '/' + character
     let imgHtml = await fetch(imgUrl)
     let imgData = await imgHtml.text()
@@ -273,4 +405,5 @@ async function parseCharacter(game, character) {
     }
     console.log(res)
     return res
+    */
 }
