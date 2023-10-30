@@ -5,6 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
     <link rel="stylesheet" href="https://fonts.xz.style/serve/inter.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@exampledev/new.css@1.1.2/new.min.css">
+    <link rel="stylesheet" href="/css/main.css">
     <script defer src="/js/main.js"></script>
 <head>
 <body>
@@ -37,15 +38,17 @@
 
     <table>
         <% for (const move of Object.keys(p2)) { %>
-            <% if (p2[move].onBlock != undefined) { %>
+            <% if (p2[move].onBlock != undefined && typeof p2[move].onBlock === 'number') { %>
                 <% const onBlock = p2[move].onBlock %>
                 <% const reversals = [] %>
                 <% let punishes = [] %>
-                <% const filters = ['air', 'aerial', '(2)', 'j.'] %>
-                <% const p1moves = Object.keys(p1).filter(e => !filters.some(f => e.toLowerCase().includes(f))) %>
+                <% const filters = ['air', 'aerial', '(2)', 'j.', 'kachoufuugetsu'] %>
+                <% let p1moves = Object.keys(p1).filter(e => !p1[e].followup && !filters.some(f => e.toLowerCase().includes(f))) %>
+                <% p1moves = p1moves.filter(e => typeof p1[e].startup === 'number') %>
                 <% for (const punish of p1moves) { %>
                     <% if ((onBlock + p1[punish].startup) === 0) { %>
                         <% reversals.push(punish) %>
+                        <% p1moves = p1moves.filter(e => typeof p1[e] === 'number') %>
                     <% } else if ((onBlock + p1[punish].startup) <= 0) { %>
                         <% punishes.push(punish) %>
                     <% } %>
@@ -55,11 +58,11 @@
                     <% } %>
                 <% } %>
 
-                <% if (punishes.length) { %>
+                <% if (punishes.length || reversals.length) { %>
                     <% if (reversals.length) { %>
-                        <p>If you block <%= move %> : you can reversal <%= String(reversals) %> to punish<br>or punish with <%= String(punishes) %></p>
+                        <tr><td class="thumbnail"><img src="<%=p2[move].img%>"></td><td><h4>If you block <%=move%> you can reversal:</h4><p><%= reversals.join(', ') %></p><% if (punishes.length) { %><p><h4>Or punish with:</h4><%=punishes.join(', ')%></p><% } %></td></tr>
                     <% } else { %>
-                        <p>If you block <%= move %> : you can punish with <%= String(punishes) %></p>
+                        <tr><td class="thumbnail"><img src="<%=p2[move].img%>"></td><td><h4>If you block <%=move%> you can punish with:</h4><p><%= punishes.join(', ') %></p></td></tr>
                     <% } %>
                 <% } %>
             <% } %>
