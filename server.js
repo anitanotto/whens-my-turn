@@ -97,7 +97,7 @@ async function parseGame(game){
 }
 
 app.get('/error', (req, res) => {
-    res.send('There was an error processing your request - if you selected P4AU, that game is not currently working on this page.')
+    res.send('There was an error processing your request - if you selected DBFZ, that game is not currently working on this page.')
 })
 
 app.get('/matchup/:game/:p1/:p2', async function(req, res) {
@@ -186,7 +186,12 @@ async function parseCharacter(game, character) {
         if (keys[i] == undefined) break
 
         const table = move.querySelector("table")
-        const img = move.querySelector('img').src
+        if (table == undefined) {
+            i++
+            continue
+        }
+        console.log(keys[i])
+        const img = move.querySelector('img')?.src || null
 
         if (table.innerHTML.includes("Version")) {
             delete res[keys[i]]
@@ -195,7 +200,12 @@ async function parseCharacter(game, character) {
             rows[0].querySelectorAll('th').forEach(r => {
                 if (r.textContent.trim() !== 'Version') {
                     if (r.children.length === 0) {
-                        headings.push(r.textContent.trim())
+                        const text = r.textContent.trim()
+                        if (text === 'On-Block') {
+                            headings.push('onBlock')
+                        } else {
+                            headings.push(r.textContent.trim().toLowerCase())
+                        }
                     } else {
                         const text = r.querySelector('.tooltip')
                         const tooltipText = r.querySelector('.tooltiptext')
@@ -204,17 +214,21 @@ async function parseCharacter(game, character) {
                         }
                         const heading = r.textContent.trim()
 
-                        if (heading === "Frame Adv") {
-                            headings.push('On-Block')
+                        if (heading === "Frame Adv" || heading === "On-Block") {
+                            headings.push('onBlock')
                         } else {
-                            headings.push(r.textContent.trim())
+                            headings.push(r.textContent.trim().toLowerCase())
                         }
                     }
                 }
             })
 
             for (let j = 1; j < rows.length; j++) {
-                let versionKey = ''
+                let versionKey = `${keys[i]} (${rows[j].children[0].textContent.trim()})`
+                if (keys[i] === rows[j].children[0].textContent.trim()) {
+                    versionKey = rows[j].children[0].textContent.trim()
+                }
+                /*
                 console.log(keys[i])
                 if (keys[i][0].match(/\d/) && !keys[i][1].match(/\d/)) {
                     versionKey = rows[j].children[0].textContent.trim()
@@ -223,11 +237,13 @@ async function parseCharacter(game, character) {
                 } else {
                     versionKey = `${keys[i]} (${rows[j].children[0].textContent.trim()})`
                 }
+                */
 
                 res[versionKey] = {}
 
                 const columns = Array.from(rows[j].children).map(c => c.textContent.trim())
 
+                // table is null here?? for chip/faust/zato ggst
                 for (let k = 1; k < columns.length; k++) {
                     let text = columns[k]
                     if (text.match(/^[+-]*\d*[+]?\d*$/) && text !== '' && text !== '-') {
@@ -243,15 +259,21 @@ async function parseCharacter(game, character) {
                     }
                 }
                 const followCheck = rows[j].children[0].textContent.trim()
+                console.log(followCheck)
                 if (followCheck.match(/[A-Z]{2,}$/) || followCheck.includes('>') || followCheck.includes('~')) {
                     res[versionKey].followup = true
                 }
+                
                 res[versionKey].img = baseURL + img
             }
         } else {
             const moveKeys = Array.from(table.querySelectorAll('th')).map(k => {
                 if (k.children.length === 0) {
-                    return k.textContent.trim()
+                    const text = k.textContent.trim()
+                    if (text === "Frame Adv" || text === "On-Block") {
+                        return 'onBlock'
+                    }
+                    return text.toLowerCase()
                 } else {
                     const text = k.querySelector('.tooltip')
                     const tooltipText = k.querySelector('.tooltiptext')
@@ -260,10 +282,10 @@ async function parseCharacter(game, character) {
                     }
                     
                     const key = k.textContent.trim()
-                    if (key === "Frame Adv") {
-                        return 'On-Block'
+                    if (key === "Frame Adv" || key === "On-Block") {
+                        return 'onBlock'
                     } else {
-                        return key
+                        return key.toLowerCase()
                     }
                 }
             })
@@ -287,7 +309,7 @@ async function parseCharacter(game, character) {
                 res[keys[i]][moveKeys[j]] = moveValues[j]
             }
 
-            if (keys[i].match(/[A-Z]{2,}$/) || keys[i].includes('>') || keys[i].includes('~')) {
+            if (keys[i] === '5AA (Frenzy)' || keys[i].match(/[A-Z]{2,}$/) || keys[i].includes('>') || keys[i].includes('~')) {
                 res[keys[i]].followup = true
             }
             
