@@ -78,6 +78,9 @@ async function parseGame(game){
     if (game === 'BlazBlue:_Central_Fiction' || game === 'Guilty_Gear_XX_Accent_Core_Plus_R') {
         return Array.from(document.querySelectorAll('area')).map(character => {
             character = character.href.split('/')
+            if (character[character.length-1] === 'Susano%27o') {
+                return "Susano'o"
+            }
             return character[character.length-1]
         }).sort()
     }
@@ -88,9 +91,12 @@ async function parseGame(game){
         let characters = Array.from(container.querySelectorAll(selector)).map(character =>{
             if (selector === 'a') {
                 character = character.href.split('/')
+                if (character[character.length-1] === 'Susano%27o') {
+                    return "Susano'o"
+                }
                 return character[character.length-1]
             }
-            return character.innerHTML.split(' ').join('_')
+            return character.textContent.split(' ').join('_')
         })
         return characters.sort()
     }
