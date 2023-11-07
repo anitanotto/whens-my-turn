@@ -435,3 +435,36 @@ async function parseCharacter(game, character) {
     return res
     */
 }
+
+app.get('/api', async function(req,res) {
+    const data = await parseIndex()
+    console.log('get /api ')
+    console.log(data[0])
+    res.render('api.ejs', {names: data[0], links: data[1], imgs: data[2]})
+})
+
+app.get('/api/games', async function(req,res) {
+    const data = await parseIndex()
+    console.log('api get games')
+    console.log(data[0])
+    res.send(data[0])
+})
+
+
+app.get('/api/:game', async function(req, res) {
+    const data = await parseGame(req.params.game)
+    console.log(`api get ${req.params.game}`)
+    console.log(data)
+    if (data === 'error') res.redirect('/error')
+    
+    res.send(data)
+})
+
+app.get('/api/:game/:character', async function(req, res) {
+    const data = await parseCharacter(req.params.game, req.params.character)
+    console.log(`api get ${req.params.game} ${req.params.character}`)
+    console.log(data)
+    if (data === 'error') res.redirect('/error')
+    
+    res.send(data)
+})

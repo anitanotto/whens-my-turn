@@ -1,0 +1,49 @@
+<html>
+<head>
+    <title>When's My Turn?</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="https://fonts.xz.style/serve/inter.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@exampledev/new.css@1.1.2/new.min.css">
+<head>
+<body>
+    <header>
+        <h1>When's My Turn?</h1>
+        <p>Always know when they're minus.</p>
+
+        <nav>
+            <a href="/">Home</a><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <a href="/api">API</a><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span>Data from </span><a href="https://www.dustloop.com/w/">Dustloop</a>
+        </nav>
+    </header>
+
+    <main>
+        <h2>API Endpoints</h2>
+        <p>The When's My Turn? API serves frame data for games by Arc System Works scraped from the Dustloop wiki. Data for every character in all the main games on the wiki is available and includes damage, frame advantage, invulnerability frames, and more - plus a thumbnail image for each of their moves.</p>
+        <p>Requests to the API can be made in the following format:</p>
+        <ul>
+            <li>
+                <h3>GET /api/games</h3>
+                <p>Returns an array list of available games as strings properly formatted for all other endpoints.</p>
+            </li>
+
+            <li>
+                <h3>GET /api/:game</h3>
+                <p>Returns an array list of the names of the characters in the given game as strings properly formatted for the final endpoint.</p>
+                <h4>Currently available games:</h4>
+                <ul>
+                    <% for (const game of names) { %>
+                        <li><%=game%></li>
+                    <% } %>
+                </ul>
+            </li>
+            
+            <li>
+                <h3>GET /api/:game/:character</h3>
+                <p>Returns an object containing frame data for the all of the given character's moves.</p>
+            </li>
+        </ul>
+    </main>
+</body>
+</html>
