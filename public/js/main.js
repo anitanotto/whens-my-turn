@@ -14,3 +14,13 @@ function updateLink() {
 }
 
 updateLink()
+
+const button = document.querySelector('#charSelect')
+
+button.addEventListener('click', displayLoading)
+
+function displayLoading() {
+    const spinner = document.createElement('span')
+    spinner.classList.add('loader')
+    button.querySelector('button').appendChild(spinner)
+}
