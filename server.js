@@ -21,9 +21,6 @@ app.get('/', async function(req,res) {
     res.render('index.ejs', {names: data[0], links: data[1], imgs: data[2]})
 })
 
-app.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}...`)
-})
 
 async function parseIndex() {
     let html = await fetch(baseURL)
@@ -467,4 +464,8 @@ app.get('/api/:game/:character', async function(req, res) {
     if (data === 'error') res.redirect('/error')
     
     res.send(data)
+})
+
+app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}...`)
 })
