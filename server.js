@@ -105,8 +105,8 @@ app.get('/error', (req, res) => {
 
 app.get('/matchup/:game/:p1/:p2', async function(req, res) {
     const data = await parseMatchup(req.params.game, req.params.p1, req.params.p2)
-    console.log(`get ${req.params.game} : ${req.params.p1} vs ${req.params.p2}`)
-    console.log(data)
+    //console.log(`get ${req.params.game} : ${req.params.p1} vs ${req.params.p2}`)
+    //console.log(data)
     if (data === 'error') res.redirect('/error')
     const characters = await parseGame(req.params.game) 
     res.render('matchup.ejs', {game: req.params.game, characters: characters,  p1name: req.params.p1, p1: data[req.params.p1], p2name: req.params.p2, p2: data[req.params.p2]})
@@ -135,8 +135,8 @@ async function parseCharacter(game, character) {
         game = "GGST"
     }
 
-    if (game === "Granblue_Fantasy:_Versus") {
-        game = "GBVS"
+    if (game === "Granblue_Fantasy_Versus:_Rising") {
+        game = "GBVSR"
     }
 
     if (game === "Dragon_Ball_FighterZ") {
@@ -171,13 +171,28 @@ async function parseCharacter(game, character) {
         game = "GGML"
     }
     
+    if (game === "Sailor_Moon_S") {
+        game = "SMS"
+    }
+
+    if (game === "Battle_Fantasia") {
+        game = "BatFan"
+    }
+
+    if (game === "Sengoku_Basara_X") {
+        game = "SBX"
+    }
+    
     const url = baseURL + '/w/' + game + '/' + character
+    console.log(url)
     let html = await fetch(url)
     let data = await html.text()
 
     const { document } = new JSDOM(data).window
 
-    const names = Array.from(document.querySelectorAll(".section-subheading")).map(n => n.textContent).filter(e => (e !== 'Unique Mechanics') && (e !== 'Instant Kill'))
+    const skips = new Set([ 'Normal Moves', 'Special Moves', 'Unique Mechanics', 'Instant Kill', 'Overview', 'Colors', 'Navigation' ])
+    const names = Array.from(document.querySelectorAll(".mw-headline")).map(n => n.textContent).filter(e => !skips.has(e))
+    console.log(names)
     for (const name of names) {
         res[name] = {}
     }
