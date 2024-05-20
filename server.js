@@ -203,7 +203,7 @@ async function parseCharacter(game, character) {
 
     const { document } = new JSDOM(data).window
 
-    const skips = new Set([ 'Normal Moves', 'Special Moves', 'Unique Mechanics', 'Instant Kill', 'Overview', 'Colors', 'Navigation' ])
+    const skips = new Set([ 'Normal Moves', 'Special Moves', 'Air Throw', 'Unique Mechanics', 'Universal Mechanics', 'Guard Cancel', 'Backwards Dodge', 'Dodge', 'Instant Kill', 'Overview', 'Colors', 'Navigation', 'Z Assists', 'Assist A', 'Assist B', 'Assist C', 'Super Moves', 'Gear Follow-ups', 'Overdrives', 'Dead Angle Attack', 'Taunt', 'Basara Attacks' ])
     const names = Array.from(document.querySelectorAll(".mw-headline")).map(n => n.textContent).filter(e => !skips.has(e))
     console.log(names)
     for (const name of names) {
