@@ -14,11 +14,24 @@ app.use(express.static('public'))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
+let index = await parseIndex()
+const ignore = new Set(['Granblue_Fantasy_Versus:_Rising','BlazBlue:_Cross_Tag_Battle', 'Guilty_Gear:_The_Missing_Link','Guilty_Gear_XX_Accent_Core_Plus_R',  'Battle_Fantasia','Sailor_Moon_S','Persona_4:_Arena_Ultimax_Remaster','BlazBlue:_Central_Fiction','Hokuto_no_Ken'])
+
+for (let i = 0; i < index[0].length; i++) {
+    if (ignore.has(index[0][i])){
+        index[0].splice(i, 1)
+        index[1].splice(i, 1)
+        index[2].splice(i, 1)
+        i--
+    }
+}
+
+console.log(index)
+
 app.get('/', async function(req,res) {
-    const data = await parseIndex()
     console.log('get / ')
-    console.log(data[0])
-    res.render('index.ejs', {names: data[0], links: data[1], imgs: data[2]})
+    console.log(index[0])
+    res.render('index.ejs', {names: index[0], links: index[1], imgs: index[2]})
 })
 
 
