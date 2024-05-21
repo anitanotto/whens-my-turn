@@ -3,9 +3,9 @@ This is the successor to my [Guilty Gear Strive Frame Data API](https://github.c
 
 Included is an app that analyzes frame data for any matchup in any of the supported games as well as an API that serves all the data as JSON.
 
-API documentation is available at https://whensmyturn.cyclic.app/api
+API documentation is available at https://whens-my-turn.onrender.com/api
 
-**Link to project:** https://whensmyturn.cyclic.app/
+**Link to project:** https://whens-my-turn.onrender.com
 
 ## How It's Made:
 
@@ -28,6 +28,6 @@ Manual data entry for all of this would have taken forever, so, I learned how to
 Flaws with the initial version of this project led to me building this version the way it is - I focused on solving those issues over the efficiency of the code since they were too detrimental to the usability of it, and now that it is stable I can improve it from where it is more easily.
 
 ## Example:
-An app I built utilizing the API is available at https://whensmyturn.cyclic.app/
+An app I built utilizing the API is available at https://whens-my-turn.onrender.com
 
 Let me know if you build anything with it so I can link it here!
